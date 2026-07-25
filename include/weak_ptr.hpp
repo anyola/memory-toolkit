@@ -12,7 +12,7 @@ namespace mtk {
     class weak_ptr {
     private:
         T* ptr;
-        ControlBlock<T>* control_block;
+        ControlBlockBase* control_block;
     public:
         weak_ptr() noexcept : ptr(nullptr), control_block(nullptr) {}
         weak_ptr(const shared_ptr<T>& sp) {
