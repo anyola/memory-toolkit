@@ -7,11 +7,14 @@
 #include "control_block.hpp"
 
 namespace mtk {
+    template<typename T> class weak_ptr;
     template<typename T>
     class shared_ptr {
     private:
         T* ptr;
         ControlBlock<T>* control_block;
+        shared_ptr(T* p, ControlBlock<T>* cb) noexcept : ptr(p), control_block(cb) {}
+        template<typename U> friend class weak_ptr;
     public:
         shared_ptr() noexcept : ptr(nullptr), control_block(nullptr) {}
         shared_ptr(std::nullptr_t) : ptr(nullptr), control_block(nullptr) {}
