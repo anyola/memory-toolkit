@@ -35,6 +35,10 @@ namespace mtk {
             other.ptr = nullptr;
             other.control_block = nullptr;
         }
+        weak_ptr& operator=(weak_ptr other) noexcept {
+            swap(*this, other);
+            return *this;
+        }
         ~weak_ptr() {
             if(control_block != nullptr) {
                 std::size_t prev = control_block->weak_count.fetch_sub(1);
@@ -71,6 +75,10 @@ namespace mtk {
                 }
             }
             return shared_ptr<T>();
+        }
+        friend void swap(weak_ptr& lhs, weak_ptr& rhs) noexcept {
+            std::swap(lhs.ptr, rhs.ptr);
+            std::swap(lhs.control_block, rhs.control_block);
         }
     };
 }
