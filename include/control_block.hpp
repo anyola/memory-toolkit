@@ -5,24 +5,31 @@
 #include <cstddef>
 
 namespace mtk {
+    class ControlBlockBase {
+    public:
+        std::atomic<std::size_t> strong_count{1};
+        std::atomic<std::size_t> weak_count{0};
+        
+        ControlBlockBase() = default;
+        virtual void destroy() = 0;
+        virtual ~ControlBlockBase() = default;
+        ControlBlockBase(const ControlBlockBase&) = delete;
+        ControlBlockBase& operator=(const ControlBlockBase&) = delete;
+        ControlBlockBase(ControlBlockBase&&) = delete;
+        ControlBlockBase& operator=(ControlBlockBase&&) = delete;
+    };
+
     template<typename T>
-    class ControlBlock {
+    class ControlBlock : public ControlBlockBase {
     private:
         T* ptr;
     public:
         explicit ControlBlock(T* p) : ptr(p) {}
 
-        void destroy() {
+        void destroy() override {
             delete ptr;
             ptr = nullptr;
         }
-        ControlBlock(const ControlBlock&) = delete;
-        ControlBlock& operator=(const ControlBlock&) = delete;
-        ControlBlock(ControlBlock&&) = delete;
-        ControlBlock& operator=(ControlBlock&&) = delete;
-
-        std::atomic<std::size_t> strong_count = 1;
-        std::atomic<std::size_t> weak_count = 0;
     };
 }
 
