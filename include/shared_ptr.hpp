@@ -15,6 +15,8 @@ namespace mtk {
         ControlBlockBase* control_block;
         shared_ptr(T* p, ControlBlockBase* cb) noexcept : ptr(p), control_block(cb) {}
         template<typename U> friend class weak_ptr;
+        template<typename U, typename... UArgs>
+        friend shared_ptr<U> make_shared(UArgs&&...);
     public:
         shared_ptr() noexcept : ptr(nullptr), control_block(nullptr) {}
         shared_ptr(std::nullptr_t) : ptr(nullptr), control_block(nullptr) {}
@@ -106,6 +108,11 @@ namespace mtk {
             std::swap(lhs.control_block, rhs.control_block);
         }
     };
+    template<typename T, typename... Args>
+    [[nodiscard]] shared_ptr<T> make_shared(Args&&... args) {
+        InlineControlBlock<T>* icb = new InlineControlBlock<T>(std::forward<Args>(args)...);
+        return shared_ptr<T>(icb->get(), icb);
+    }
 }
 
-#endif
+#endif 

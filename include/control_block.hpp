@@ -3,13 +3,14 @@
 
 #include <atomic>
 #include <cstddef>
+#include <utility>
 
 namespace mtk {
     class ControlBlockBase {
     public:
         std::atomic<std::size_t> strong_count{1};
         std::atomic<std::size_t> weak_count{0};
-        
+
         ControlBlockBase() = default;
         virtual void destroy() = 0;
         virtual ~ControlBlockBase() = default;
@@ -31,6 +32,25 @@ namespace mtk {
             ptr = nullptr;
         }
     };
+
+    template<typename T>
+    class InlineControlBlock : public ControlBlockBase {
+    private:
+        alignas(T) unsigned char storage[sizeof(T)];
+    public:
+        template<typename... Args>
+        explicit InlineControlBlock(Args&&... args) {
+            ::new (static_cast<void*>(storage)) T(std::forward<Args>(args)...);
+        }
+        T* get() noexcept {
+            return reinterpret_cast<T*>(storage);
+        }
+        void destroy() override {
+            get()->~T();
+        }
+        
+    };
+
 }
 
 #endif
