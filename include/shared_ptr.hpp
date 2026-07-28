@@ -17,6 +17,14 @@ namespace mtk {
         template<typename U> friend class weak_ptr;
         template<typename U, typename... UArgs>
         friend shared_ptr<U> make_shared(UArgs&&...);
+
+        template<typename U, typename T>
+        friend shared_ptr<U> static_pointer_cast(const shared_ptr<T>& s_ptr) noexcept;
+        template<typename U, typename T>
+        friend shared_ptr<U> dynamic_pointer_cast(const shared_ptr<T>& s_ptr) noexcept;
+        template<typename U, typename T>
+        friend shared_ptr<U> const_pointer_cast(const shared_ptr<T>& s_ptr) noexcept;
+        
     public:
         shared_ptr() noexcept : ptr(nullptr), control_block(nullptr) {}
         shared_ptr(std::nullptr_t) : ptr(nullptr), control_block(nullptr) {}
@@ -108,11 +116,42 @@ namespace mtk {
             std::swap(lhs.control_block, rhs.control_block);
         }
     };
+    
     template<typename T, typename... Args>
     [[nodiscard]] shared_ptr<T> make_shared(Args&&... args) {
         InlineControlBlock<T>* icb = new InlineControlBlock<T>(std::forward<Args>(args)...);
         return shared_ptr<T>(icb->get(), icb);
     }
+
+    template<typename U, typename T>
+    [[nodiscard]] shared_ptr<U> static_pointer_cast(const shared_ptr<T>& s_ptr) noexcept {
+        T* raw_ptr = s_ptr.get();
+        U* casted = static_cast<U*>(raw_ptr);
+        s_ptr.control_block->strong_count.fetch_add(1);
+        return shared_ptr<U>(casted, s_ptr.control_block);
+    }
+
+    template<typename U, typename T>
+    [[nodiscard]] shared_ptr<U> dynamic_pointer_cast(const shared_ptr<T>& s_ptr) noexcept {
+        T* raw_ptr = s_ptr.get();
+        U* casted = dynamic_cast<U*>(raw_ptr);
+        if(casted != nullptr) {
+            s_ptr.control_block->strong_count.fetch_add(1);
+            return shared_ptr<U>(casted, s_ptr.control_block);
+        }
+        else{
+            return shared_ptr<U>(casted);
+        }
+    }
+
+    template<typename U, typename T>
+    [[nodiscard]] shared_ptr<U> const_pointer_cast(const shared_ptr<T>& s_ptr) noexcept {
+        T* raw_ptr = s_ptr.get();
+        U* casted = const_cast<U*>(raw_ptr);
+        s_ptr.control_block->strong_count.fetch_add(1);
+        return shared_ptr<U>(casted, s_ptr.control_block);
+    }
+
 }
 
 #endif 
