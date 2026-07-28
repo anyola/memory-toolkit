@@ -18,12 +18,12 @@ namespace mtk {
         template<typename U, typename... UArgs>
         friend shared_ptr<U> make_shared(UArgs&&...);
 
-        template<typename U, typename T>
-        friend shared_ptr<U> static_pointer_cast(const shared_ptr<T>& s_ptr) noexcept;
-        template<typename U, typename T>
-        friend shared_ptr<U> dynamic_pointer_cast(const shared_ptr<T>& s_ptr) noexcept;
-        template<typename U, typename T>
-        friend shared_ptr<U> const_pointer_cast(const shared_ptr<T>& s_ptr) noexcept;
+        template<typename U, typename T2>
+        friend shared_ptr<U> static_pointer_cast(const shared_ptr<T2>& s_ptr) noexcept;
+        template<typename U, typename T2>
+        friend shared_ptr<U> dynamic_pointer_cast(const shared_ptr<T2>& s_ptr) noexcept;
+        template<typename U, typename T2>
+        friend shared_ptr<U> const_pointer_cast(const shared_ptr<T2>& s_ptr) noexcept;
         
     public:
         shared_ptr() noexcept : ptr(nullptr), control_block(nullptr) {}
@@ -116,7 +116,7 @@ namespace mtk {
             std::swap(lhs.control_block, rhs.control_block);
         }
     };
-    
+
     template<typename T, typename... Args>
     [[nodiscard]] shared_ptr<T> make_shared(Args&&... args) {
         InlineControlBlock<T>* icb = new InlineControlBlock<T>(std::forward<Args>(args)...);
