@@ -15,6 +15,7 @@ namespace mtk {
         ControlBlockBase* control_block;
 
         template<typename U> friend class shared_ptr;
+        template<typename U> friend void init_weak_this(U* p, ControlBlockBase* cb);
         
         weak_ptr(T* p, ControlBlockBase* cb) noexcept {
             ptr = p;

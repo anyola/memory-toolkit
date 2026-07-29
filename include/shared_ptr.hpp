@@ -35,6 +35,7 @@ namespace mtk {
             if(p != nullptr) {
                 ptr = p;
                 control_block = new ControlBlock<T>(p);
+                init_weak_this(p, control_block);
             }
             else {
                 ptr = nullptr;
@@ -123,6 +124,7 @@ namespace mtk {
     template<typename T, typename... Args>
     [[nodiscard]] shared_ptr<T> make_shared(Args&&... args) {
         InlineControlBlock<T>* icb = new InlineControlBlock<T>(std::forward<Args>(args)...);
+        init_weak_this(icb->get(), icb);
         return shared_ptr<T>(icb->get(), icb);
     }
 
@@ -158,7 +160,7 @@ namespace mtk {
     template<typename T>
     void init_weak_this(T* p, ControlBlockBase* cb) {
         if constexpr (std::is_base_of_v<enable_shared_from_this<T>, T>){
-            p->weak_ptr_this = shared_ptr<T>(p, cb);
+            p->weak_ptr_this = weak_ptr<T>(p, cb);
         }
     }
 }
