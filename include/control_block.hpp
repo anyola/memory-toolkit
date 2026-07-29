@@ -9,7 +9,7 @@ namespace mtk {
     class ControlBlockBase {
     public:
         std::atomic<std::size_t> strong_count{1};
-        std::atomic<std::size_t> weak_count{0};
+        std::atomic<std::size_t> weak_count{1};
 
         ControlBlockBase() = default;
         virtual void destroy() = 0;

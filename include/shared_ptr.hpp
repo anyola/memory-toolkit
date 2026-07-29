@@ -64,7 +64,7 @@ namespace mtk {
                 std::size_t prev = control_block->strong_count.fetch_sub(1);
                 if(prev == 1) {
                     control_block->destroy();
-                    if(control_block->strong_count == 0 && control_block->weak_count == 0) {
+                    if(control_block->weak_count.fetch_sub(1) == 1) {
                         delete control_block;
                     }
                 }
