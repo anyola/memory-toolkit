@@ -3,11 +3,14 @@
 
 #include <cstddef>
 #include <utility>
+#include <type_traits>
 
 #include "control_block.hpp"
 
 namespace mtk {
     template<typename T> class weak_ptr;
+    template<typename T> class enable_shared_from_this;
+
     template<typename T>
     class shared_ptr {
     private:
@@ -152,6 +155,12 @@ namespace mtk {
         return shared_ptr<U>(casted, s_ptr.control_block);
     }
 
+    template<typename T>
+    void init_weak_this(T* p, ControlBlockBase* cb) {
+        if constexpr (std::is_base_of_v<enable_shared_from_this<T>, T>){
+            p->weak_ptr_this = shared_ptr<T>(p, cb);
+        }
+    }
 }
 
 #endif 

@@ -9,6 +9,7 @@ namespace mtk {
     private:
         mutable weak_ptr<T> weak_ptr_this;
         template<typename U> friend class shared_ptr;
+        template<typename U> friend void init_weak_this(U* p, ControlBlockBase* cb);
     protected:
         enable_shared_from_this() noexcept = default;
         enable_shared_from_this(const enable_shared_from_this&) noexcept {}
@@ -20,7 +21,7 @@ namespace mtk {
         shared_ptr<T> shared_from_this() {
             return weak_ptr_this.lock();
         }
-
-
     };
 }
+
+#endif

@@ -13,6 +13,16 @@ namespace mtk {
     private:
         T* ptr;
         ControlBlockBase* control_block;
+
+        template<typename U> friend class shared_ptr;
+        
+        weak_ptr(T* p, ControlBlockBase* cb) noexcept {
+            ptr = p;
+            control_block = cb;
+            if(control_block != nullptr) {
+                control_block->weak_count.fetch_add(1);
+            }
+        }
     public:
         weak_ptr() noexcept : ptr(nullptr), control_block(nullptr) {}
         weak_ptr(const shared_ptr<T>& sp) {
