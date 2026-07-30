@@ -100,8 +100,8 @@ namespace mtk {
     };
 
     template<typename T, typename ... Args>
-    typename std::enable_if<!std::is_array<T>::value, unique_ptr<T>>::type
-    [[nodiscard]] unique_ptr<T> make_unique(Args&&... args){
+    [[nodiscard]] typename std::enable_if<!std::is_array<T>::value, unique_ptr<T>>::type
+    make_unique(Args&&... args){
         return unique_ptr<T>(new T(std::forward<Args>(args)...));
     }
 
