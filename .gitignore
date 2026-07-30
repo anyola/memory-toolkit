@@ -1,29 +1,24 @@
-bin/
-lib/
 googletest/
-googlemock/
-
 
 build/
 cmake-build-*/
 out/
+Testing/
 
-
+bin/
+lib/
 *.exe
 *.out
 *.app
 
-
 *.o
 *.obj
-
 
 *.a
 *.so
 *.dylib
 *.lib
 *.dll
-
 
 CMakeCache.txt
 CMakeFiles/
