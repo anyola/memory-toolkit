@@ -22,10 +22,10 @@ namespace mtk {
         T2& get_second() noexcept {
             return *this;
         }
-        T1& get_first() const noexcept {
+        const T1& get_first() const noexcept {
             return first;
         }
-        T2& get_second() const noexcept {
+        const T2& get_second() const noexcept {
             return *this;
         }
     };
@@ -43,12 +43,12 @@ namespace mtk {
             return first;
         }
         T2& get_second() noexcept {
-            return *this;
+            return second;
         }
-        T1& get_first() const noexcept {
+        const T1& get_first() const noexcept {
             return first;
         }
-        T2& get_second() const noexcept {
+        const T2& get_second() const noexcept {
             return second;
         }
 
