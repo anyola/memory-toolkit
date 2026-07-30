@@ -22,8 +22,14 @@ namespace mtk {
         T2& get_second() noexcept {
             return *this;
         }
+        T1& get_first() const noexcept {
+            return first;
+        }
+        T2& get_second() const noexcept {
+            return *this;
+        }
     };
-    
+
     template<typename T1, typename T2>
     class CompressedPair<T1, T2, false> {
     private:
@@ -32,11 +38,17 @@ namespace mtk {
     public:
         CompressedPair() = default;
         CompressedPair(T1 f, T2 s) : first(std::move(f)), second(std::move(s)) {}
-
+        
         T1& get_first() noexcept {
             return first;
         }
         T2& get_second() noexcept {
+            return *this;
+        }
+        T1& get_first() const noexcept {
+            return first;
+        }
+        T2& get_second() const noexcept {
             return second;
         }
 
