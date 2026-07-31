@@ -1,9 +1,18 @@
 #ifndef ENABLE_SHARED_FROM_THIS_HPP
 #define ENABLE_SHARED_FROM_THIS_HPP
 
+#include <exception>
 #include "weak_ptr.hpp"
 
 namespace mtk {
+
+    class bad_weak_ptr : public std::exception {
+    public:
+        const char* what() const noexcept override {
+            return "mtk::bad_weak_ptr: object is not owned by a shared_ptr";
+        }
+    };
+
     template<typename T>
     class enable_shared_from_this {
     private:
@@ -19,7 +28,13 @@ namespace mtk {
         ~enable_shared_from_this() = default;
     public:
         shared_ptr<T> shared_from_this() {
-            return weak_ptr_this.lock();
+            shared_ptr<T> sp = weak_ptr_this.lock();
+            if(sp != nullptr) {
+                return sp;
+            }
+            else {
+                throw bad_weak_ptr();
+            }
         }
     };
 }

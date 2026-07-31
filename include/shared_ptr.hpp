@@ -33,8 +33,13 @@ namespace mtk {
         shared_ptr(std::nullptr_t) : ptr(nullptr), control_block(nullptr) {}
         explicit shared_ptr(T* p) {
             if(p != nullptr) {
+                try{
+                    control_block = new ControlBlock<T>(p);
+                } catch (...) {
+                    delete p;
+                    throw;
+                }
                 ptr = p;
-                control_block = new ControlBlock<T>(p);
                 init_weak_this(p, control_block);
             }
             else {
