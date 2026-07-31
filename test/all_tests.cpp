@@ -334,7 +334,17 @@ TEST(EnableSharedFromThis, DestructionDoesNotCrashUnderAsan) {
     { mtk::shared_ptr<Node> n = mtk::make_shared<Node>(3); }
     SUCCEED();
 }
- 
+
+TEST(EnableSharedFromThis, ThrowsBadWeakPtrIfNotOwnedByAnySharedPtr) {
+    Node stack_node(4);
+    EXPECT_THROW(stack_node.get_self(), mtk::bad_weak_ptr);
+}
+
+TEST(EnableSharedFromThis, DoesNotThrowWhenProperlyOwned) {
+    mtk::shared_ptr<Node> n(new Node(5));
+    EXPECT_NO_THROW(n->get_self());
+}
+
 // ============================================================================
 // intrusive_ptr
 // ============================================================================
