@@ -1,30 +1,5 @@
 # memory-toolkit
 
-<<<<<<< HEAD
-Memory management library exploring ownership models,
-reference counting strategies, and lifetime management techniques behind
-modern C++ smart pointers.
-
-The project implements several memory ownership abstractions inspired by
-`std::memory`, focusing not only on reproducing the public API, but also on
-understanding the engineering decisions behind it:
-
-- exclusive ownership and move semantics;
-- shared ownership and reference counting;
-- weak observation without extending lifetime;
-- intrusive reference counting;
-- exception-safe resource management;
-- memory optimization techniques.
-
-The goal of this project is not to replace the standard library, but to
-recreate a minimal memory toolkit and study the design trade-offs behind
-modern C++ ownership models.
-
-Detailed architectural decisions and implementation notes are available in
-[DESIGN.md](DESIGN.md).
-
-## Quick example
-=======
 Библиотека управления памятью, исследующая модели владения, стратегии подсчёта ссылок и техники управления временем жизни объектов, лежащие в основе умных указателей C++.
 
 - эксклюзивное владение и move-семантика;
@@ -35,7 +10,6 @@ Detailed architectural decisions and implementation notes are available in
 - техники оптимизации памяти.
 
 ## Быстрый пример
->>>>>>> 80349aa (docs: add README.md)
 
 ```cpp
 #include "shared_ptr.hpp"
@@ -44,32 +18,6 @@ Detailed architectural decisions and implementation notes are available in
 auto owner = mtk::make_unique<Widget>(args...);
 
 mtk::shared_ptr<Widget> a = mtk::make_shared<Widget>(args...);
-<<<<<<< HEAD
-mtk::shared_ptr<Widget> b = a;          // shared ownership, refcount == 2
-mtk::weak_ptr<Widget> w = a;            // observes without extending lifetime
-
-if (auto locked = w.lock()) {
-    // safe access while the object is still alive
-}
-```
-
-## What's implemented
-
-| | Supported |
-|---|---|
-| `unique_ptr<T, Deleter>` | default/custom deleter, move-only, `unique_ptr<T[]>`, `make_unique` |
-| `shared_ptr<T>` / `weak_ptr<T>` | copy/move, `use_count`, `reset`, comparisons, `swap` |
-| `make_shared<T>` | single-allocation optimization (measured, not just claimed — see below) |
-| Pointer casts | `static_pointer_cast`, `dynamic_pointer_cast`, `const_pointer_cast` |
-| `enable_shared_from_this<T>` | safe `shared_from_this()` from inside an object |
-| `intrusive_ptr<T>` + `RefCounter` | ADL-based reference counting, single allocation |
-| `CompressedPair<T1, T2>` | Empty Base Optimization for stateless deleters |
-| Thread safety | atomic reference counts, verified under ThreadSanitizer |
-
-## Measured results
-
-`make_shared` allocation count, verified by a standalone test that overrides the global `operator new`:
-=======
 mtk::shared_ptr<Widget> b = a;          // разделяемое владение, refcount == 2
 mtk::weak_ptr<Widget> w = a;            // наблюдение без продления времени жизни
 
@@ -84,7 +32,7 @@ if (auto locked = w.lock()) {
 |---|---|
 | `unique_ptr<T, Deleter>` | делитер по умолчанию/кастомный, move-only, `unique_ptr<T[]>`, `make_unique` |
 | `shared_ptr<T>` / `weak_ptr<T>` | copy/move, `use_count`, `reset`, сравнения, `swap` |
-| `make_shared<T>` | оптимизация в одну аллокацию  |
+| `make_shared<T>` | оптимизация в одну аллокацию (измерено, а не просто заявлено — см. ниже) |
 | Приведения указателей | `static_pointer_cast`, `dynamic_pointer_cast`, `const_pointer_cast` |
 | `enable_shared_from_this<T>` | безопасный `shared_from_this()` изнутри объекта |
 | `intrusive_ptr<T>` + `RefCounter` | подсчёт ссылок, всегда одна аллокация |
@@ -93,7 +41,7 @@ if (auto locked = w.lock()) {
 
 ## Архитектурные решения
 
-### Control block
+### Control block:
 
 `shared_ptr` не хранит объект напрямую — он хранит указатель на **control block**, отдельную структуру со счётчиками ссылок. Это позволяет нескольким независимым `shared_ptr` согласованно определять момент удаления объекта.
 
@@ -109,31 +57,13 @@ ControlBlockBase          — strong_count, weak_count, virtual destroy()
 ### `make_shared`: одна аллокация вместо двух
 
 `InlineControlBlock<T>` хранит `alignas(T) unsigned char storage[sizeof(T)]` рядом со счётчиками, а объект строится в этом хранилище через placement new — вместо раздельных `new T(...)` и `new ControlBlock<T>(...)`.
->>>>>>> 80349aa (docs: add README.md)
 
 ```text
 shared_ptr(new int(...)) allocations: 2
 make_shared<int>(...) allocations:    1
 ```
 
-<<<<<<< HEAD
-Empty Base Optimization, verified with `static_assert` against the actual object size:
-
-```cpp
-sizeof(unique_ptr<int, EmptyDeleter>) == sizeof(int*)   // == 8 on a 64-bit platform
-```
-## Safety guarantees
-
-The implementation provides:
-
-- exception-safe ownership transfer in `shared_ptr(T*)` (no leaks if control block allocation fails);
-- correct `shared_from_this()` semantics via `bad_weak_ptr`;
-- thread-safe reference counting using atomic counters;
-- memory safety verified under AddressSanitizer and UndefinedBehaviorSanitizer.
-
-## Build & test
-=======
-### Потокобезопасность
+### Потокобезопасность:
 
 `strong_count`/`weak_count` — атомарные, поэтому копирование и уничтожение `shared_ptr`/`intrusive_ptr` из разных потоков безопасно. Но атомарный счётчик **не** делает потокобезопасным сам управляемый объект — одновременная запись в `*shared_ptr<T>` из двух потоков остаётся обычной гонкой данных, как и в `std::shared_ptr`.
 
@@ -176,6 +106,7 @@ if (prev == 1) {
 
 Если Deleter — класс без состояния (`default_delete<T>`), наивное хранение `T* ptr; Deleter deleter;` всё равно тратит на `deleter` минимум 1 байт. `CompressedPair<T1, T2>` наследуется от `T2`, когда тот пустой и не `final` — пустые базовые классы не увеличивают размер производного объекта. Выбор между наследованием и полем делается на этапе компиляции через `std::is_empty_v<T2> && !std::is_final_v<T2>`.
 
+Подтверждено `static_assert`'ом и на практике:
 
 ```cpp
 sizeof(unique_ptr<int, EmptyDeleter>) == sizeof(int*)   // == 8 на 64-битной платформе
@@ -197,7 +128,6 @@ sizeof(unique_ptr<int, EmptyDeleter>) == sizeof(int*)   // == 8 на 64-битн
 - Нет `atomic_load`/`atomic_store` для `shared_ptr` — потокобезопасны независимые экземпляры `shared_ptr`, но не конкурентная запись в один и тот же объект `shared_ptr` из разных потоков.
 
 ## Сборка и запуск тестов
->>>>>>> 80349aa (docs: add README.md)
 
 ```bash
 mkdir build
@@ -208,20 +138,7 @@ cmake --build .
 ctest --output-on-failure
 ```
 
-<<<<<<< HEAD
-With sanitizers:
-
-```bash
-cmake .. -DMEM_ENABLE_ASAN=ON   # AddressSanitizer + UndefinedBehaviorSanitizer
-cmake .. -DMEM_ENABLE_TSAN=ON   # ThreadSanitizer
-```
-
-All unit tests (GoogleTest) plus a standalone allocation-count check pass cleanly under both sanitizer configurations.
-
-## Project layout
-=======
 ## Структура проекта
->>>>>>> 80349aa (docs: add README.md)
 
 ```text
 memory-toolkit/
@@ -235,14 +152,7 @@ memory-toolkit/
 │   ├── control_block.hpp
 │   ├── compressed_pair.hpp
 │   └── default_delete.hpp
-<<<<<<< HEAD
-├── test/
-│   ├── all_tests.cpp
-│   └── make_shared_allocation_check.cpp
-└── DESIGN.md
-=======
 └── test/
     ├── all_tests.cpp
     └── make_shared_allocation_check.cpp
->>>>>>> 80349aa (docs: add README.md)
 ```
