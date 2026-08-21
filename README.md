@@ -1,5 +1,7 @@
 # memory-toolkit
 
+[![CI](https://github.com/anyola/memory-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/anyola/memory-toolkit/actions/workflows/ci.yml)
+
 Библиотека управления памятью, исследующая модели владения, стратегии подсчёта ссылок и техники управления временем жизни объектов, лежащие в основе умных указателей C++.
 
 - эксклюзивное владение и move-семантика;
